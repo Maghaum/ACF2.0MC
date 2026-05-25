@@ -1,0 +1,173 @@
+
+<h2 class="sr-only">Visualização interativa da jornada desde a planilha original até os conceitos do livro — mostrando como excluídos-por-si se tornou modos puros</h2>
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .root { padding: 1.5rem 0; }
+
+  .journey { display: flex; flex-direction: column; gap: 0; }
+  .step { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; background: var(--color-background-primary); position: relative; }
+  .step + .step { margin-top: 10px; }
+  .step-connector { width: 2px; height: 18px; background: var(--color-border-tertiary); margin: 0 auto; }
+  .step-tag { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 99px; display: inline-block; margin-bottom: 8px; }
+  .tag-origin { background: #E6F1FB; color: #185FA5; }
+  .tag-discovery { background: #FAEEDA; color: #854F0B; }
+  .tag-concept { background: #E1F5EE; color: #0F6E56; }
+  .tag-book { background: #EEEDFE; color: #534AB7; }
+  .step-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 6px; }
+  .step-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin: 0; }
+  .step-body strong { color: var(--color-text-primary); font-weight: 500; }
+
+  .sheets-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .sheet-pill { font-size: 12px; padding: 4px 10px; border-radius: 99px; border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); cursor: pointer; background: var(--color-background-primary); }
+  .sheet-pill:hover { background: var(--color-background-secondary); }
+  .sheet-pill.pure { background: #E1F5EE; color: #0F6E56; border-color: #5DCAA5; font-weight: 500; }
+  .sheet-pill.non { background: #FAEEDA; color: #854F0B; border-color: #EF9F27; }
+
+  .visual-row { display: flex; gap: 6px; align-items: flex-end; flex-wrap: wrap; margin-top: 10px; }
+  .bar-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .bar { width: 20px; border-radius: 2px 2px 0 0; transition: height 0.3s; }
+  .bar-label { font-size: 10px; color: var(--color-text-tertiary); }
+
+  .renaming-box { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding: 10px 14px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+  .old-name { font-size: 13px; color: #854F0B; font-family: var(--font-mono); padding: 4px 10px; background: #FAEEDA; border-radius: var(--border-radius-md); }
+  .arrow-rename { font-size: 18px; color: var(--color-text-tertiary); }
+  .new-name { font-size: 13px; color: #0F6E56; font-family: var(--font-mono); padding: 4px 10px; background: #E1F5EE; border-radius: var(--border-radius-md); font-weight: 500; }
+  .rename-desc { font-size: 12px; color: var(--color-text-secondary); }
+
+  .grid-24000 { margin-top: 10px; }
+  .grid-title { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 6px; }
+  .grid-row { display: flex; flex-wrap: wrap; gap: 2px; }
+  .cell { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
+  .cell-pure { background: #1D9E75; }
+  .cell-impure { background: #D3D1C7; }
+  .cell-label { display: flex; gap: 10px; margin-top: 6px; font-size: 11px; color: var(--color-text-secondary); }
+  .cell-legend { display: inline-flex; align-items: center; gap: 4px; }
+  .cell-legend-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+  .table-mini { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  .table-mini th { color: var(--color-text-secondary); font-weight: 500; padding: 4px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); text-align: left; background: var(--color-background-secondary); }
+  .table-mini td { padding: 4px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+  .pure-row td { background: #E1F5EE !important; color: #085041; }
+  .non-row td { background: #FAEEDA !important; color: #633806; }
+  @media (prefers-color-scheme: dark) {
+    .pure-row td { background: #085041 !important; color: #9FE1CB; }
+    .non-row td { background: #412402 !important; color: #FAC775; }
+  }
+
+  .insight-box { border-left: 3px solid #1D9E75; padding: 8px 12px; margin-top: 10px; background: var(--color-background-secondary); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+  .insight-box strong { color: var(--color-text-primary); }
+</style>
+
+<div class="root">
+
+<div class="journey">
+
+  <!-- Step 1: A planilha original -->
+  <div class="step">
+    <span class="step-tag tag-origin"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Ponto de partida</span>
+    <p class="step-title">O arquivo matematica-libreoffice-calc.ods</p>
+    <p class="step-body">Tudo começou aqui. A planilha tem <strong>11 abas</strong> explorando a estrutura do número <strong>8.640.000</strong> — o ciclo completo de centésimos de segundo em um dia. As abas revelam que 24.000 (um grau do ciclo) tem comportamentos muito diferentes dependendo do número pelo qual é dividido.</p>
+    <div class="sheets-grid" id="sheets-grid">
+      <span class="sheet-pill">múltiplos-de-360</span>
+      <span class="sheet-pill">inteiros-div.-8640000</span>
+      <span class="sheet-pill non">excluídos-por-inteiros</span>
+      <span class="sheet-pill pure">excluídos-por-si ← aqui</span>
+      <span class="sheet-pill">primos.1-1000</span>
+      <span class="sheet-pill">27-8640000</span>
+      <span class="sheet-pill">54-864000</span>
+      <span class="sheet-pill">96-8640000</span>
+      <span class="sheet-pill">864-8640000</span>
+      <span class="sheet-pill">Sheet3</span>
+      <span class="sheet-pill">Sheet5</span>
+    </div>
+  </div>
+
+  <div class="step-connector"></div>
+
+  <!-- Step 2: A descoberta dos dois tipos -->
+  <div class="step">
+    <span class="step-tag tag-discovery"><i class="ti ti-search" aria-hidden="true"></i> A descoberta central</span>
+    <p class="step-title">24.000 divide o mundo em dois tipos de número</p>
+    <p class="step-body">Ao dividir 24.000 por cada inteiro k, aparece um padrão claro: alguns números cabem <strong>exatamente</strong>, sem sobra. Outros deixam um <strong>resto</strong>. Essa diferença simples é o coração de toda a teoria.</p>
+
+    <table class="table-mini">
+      <thead><tr><th>k</th><th>24.000 ÷ k</th><th>Resultado</th><th>Resto</th><th>Tipo na planilha</th></tr></thead>
+      <tbody>
+        <tr class="pure-row"><td>1</td><td>24.000 ÷ 1</td><td>24.000</td><td>0</td><td>excluído-por-si</td></tr>
+        <tr class="pure-row"><td>6</td><td>24.000 ÷ 6</td><td>4.000</td><td>0</td><td>excluído-por-si</td></tr>
+        <tr class="non-row"><td>7</td><td>24.000 ÷ 7</td><td>3.428</td><td>4</td><td>excluído-por-inteiros</td></tr>
+        <tr class="pure-row"><td>8</td><td>24.000 ÷ 8</td><td>3.000</td><td>0</td><td>excluído-por-si</td></tr>
+        <tr class="non-row"><td>9</td><td>24.000 ÷ 9</td><td>2.666</td><td>6</td><td>excluído-por-inteiros</td></tr>
+        <tr class="pure-row"><td>10</td><td>24.000 ÷ 10</td><td>2.400</td><td>0</td><td>excluído-por-si</td></tr>
+      </tbody>
+    </table>
+    <div class="insight-box">
+      O 7 foi o <strong>primeiro grande surpresa</strong>: é o menor inteiro que não divide 24.000. A aba "excluídos-por-inteiros" nasceu para registrar o padrão irregular (7, 14, 22, 29...) que ele cria — passos que alternam entre 7 e 8 sem nunca pousar exatamente em 24.000.
+    </div>
+  </div>
+
+  <div class="step-connector"></div>
+
+  <!-- Step 3: Os dois grupos - visualização das 24000 células -->
+  <div class="step">
+    <span class="step-tag tag-discovery"><i class="ti ti-grid-dots" aria-hidden="true"></i> O mapa dos divisores</span>
+    <p class="step-title">De 1 a 100: quem "encaixa" no ciclo?</p>
+    <p class="step-body">Dos 100 primeiros inteiros, apenas <strong>25 dividem 24.000 exatamente</strong>. A planilha os chamava de "excluídos-por-si" — excluídos da lista dos irregulares, pois se autoexcluem por se encaixarem perfeitamente.</p>
+    <div class="grid-24000">
+      <p class="grid-title">k = 1 até 100 — cada quadrado é um número:</p>
+      <div class="grid-row" id="grid-cells"></div>
+      <div class="cell-label">
+        <span class="cell-legend"><span class="cell-legend-sq" style="background:#1D9E75;"></span>Divide 24.000 exatamente (25 números)</span>
+        <span class="cell-legend"><span class="cell-legend-sq" style="background:#D3D1C7;"></span>Deixa resto (75 números)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-connector"></div>
+
+  <!-- Step 4: A renomeação -->
+  <div class="step">
+    <span class="step-tag tag-concept"><i class="ti ti-arrow-right" aria-hidden="true"></i> A renomeação</span>
+    <p class="step-title">De "excluídos-por-si" para "modos puros"</p>
+    <p class="step-body">O nome original descrevia o <em>mecanismo</em> (eles se excluem da lista dos irregulares). O novo nome descreve a <em>essência</em>: são os modos que ressoam de forma <strong>pura</strong> com o ciclo — sem sobra, sem distorção, sem ritmo irregular.</p>
+    <div class="renaming-box">
+      <span class="old-name">excluídos-por-si</span>
+      <span class="arrow-rename">→</span>
+      <span class="new-name">modos puros</span>
+      <span class="rename-desc">Do mecanismo para o significado</span>
+    </div>
+    <div class="insight-box" style="margin-top:10px;">
+      Os 25 modos puros de 1 a 100 são: <strong>1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 16, 20, 24, 25, 30, 32, 40, 48, 50, 60, 64, 75, 80, 96, 100</strong> — todos os divisores de 24.000 nesse intervalo.
+    </div>
+  </div>
+
+  <div class="step-connector"></div>
+
+  <!-- Step 5: O livro -->
+  <div class="step">
+    <span class="step-tag tag-book"><i class="ti ti-book" aria-hidden="true"></i> No livro</span>
+    <p class="step-title">Álgebra Cíclica — Capítulo 22</p>
+    <p class="step-body">No livro, os "modos puros" ganham um papel central: são as <strong>frequências harmônicas exatas</strong> do Ciclo Perfeito de 8.640.000 estados por dia. Enquanto os outros modos criam ritmos irregulares (como o 7 alternando passos de 7 e 8), os modos puros criam divisões perfeitas e uniformes do ciclo. A multiplicidade Qk de cada modo puro divide 24.000 exatamente — sem arredondamento, sem distorção.</p>
+    <div class="renaming-box" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+      <p style="margin:0; font-size:13px; color:var(--color-text-secondary);"><strong style="color:var(--color-text-primary);">Planilha →</strong> "excluídos-por-si": lista de k que divide 24.000 sem resto</p>
+      <p style="margin:0; font-size:13px; color:var(--color-text-secondary);"><strong style="color:var(--color-text-primary);">Resumo.ods →</strong> coluna Qk = ⌊24.000 ÷ k⌋ com destaque nos modos puros</p>
+      <p style="margin:0; font-size:13px; color:var(--color-text-secondary);"><strong style="color:var(--color-text-primary);">Livro (Cap. 22) →</strong> "modos puros" = frequências harmônicas exatas do ciclo de 8.640.000</p>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+const pureDivisors = new Set([1,2,3,4,5,6,8,10,12,15,16,20,24,25,30,32,40,48,50,60,64,75,80,96,100]);
+const grid = document.getElementById('grid-cells');
+for (let k = 1; k <= 100; k++) {
+  const cell = document.createElement('span');
+  cell.className = 'cell ' + (pureDivisors.has(k) ? 'cell-pure' : 'cell-impure');
+  cell.title = `k=${k}${pureDivisors.has(k) ? ' — modo puro (24000÷'+k+'='+Math.floor(24000/k)+')' : ' — resto '+(24000%k)}`;
+  grid.appendChild(cell);
+}
+</script>
