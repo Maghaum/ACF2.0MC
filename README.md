@@ -1,5 +1,6 @@
 # ACF2.0MC
 Repositório para compartilhamento do arquivos sitados no livro Uma noite de chat com o Gemini
+Disponível na Amazon:  https://www.amazon.com.br/dp/B0H2VJQRVD/ref=sr_1_3?sr=8-3
 
 # Álgebra Cíclica - Física 2.0: Mecânica Cíclica
 
